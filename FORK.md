@@ -39,10 +39,16 @@ swatch appears first in *Settings → General settings → Themes* in every base
 ## 4. Project plumbing
 
 - `.github/workflows/build.yml` — unit tests, typecheck and a production bundle on every push and
-  pull request; a `v*` tag publishes `shapla-tweb-dist.tar.gz` as a release asset.
+  pull request; a push to `master` publishes the bundle to GitHub Pages
+  (https://sheikhminds.github.io/shapla-tweb/), and a `v*` tag publishes `shapla-tweb-dist.tar.gz`
+  as a release asset.
 - `.github/workflows/push-review.yml` — removed. It is upstream's private maintainer workflow (it
   posts to Telegram with repository secrets this fork does not have) and would fail on every push.
 - `README.md` — Shapla header above the untouched upstream instructions.
+- `src/lib/calls/e2e/tests/blockchain.test.ts` — three `describe` bodies built libsodium keys while
+  the file was being collected, before the `beforeAll` that awaits `sodium.ready`; the full suite
+  hit `crypto_sign_seed_keypair is not a function` on CI. The keys are now made in `beforeAll`.
+  No assertion or fixture changed.
 
 ## What is *not* changed
 

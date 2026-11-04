@@ -294,9 +294,16 @@ describe('Blockchain.applyBlock', () => {
 // height/prev-hash/signature) — only the AUTHORIZATION is illegitimate.
 describe('Blockchain.applyBlock — per-change authorization (WebK-2)', () => {
   const aliceId = BigInt(1), bobId = BigInt(2), attackerId = BigInt(666);
-  const alice = PrivateKey.fromSeed(new Uint8Array(32).fill(0xa1));
-  const bob = PrivateKey.fromSeed(new Uint8Array(32).fill(0xb2));
-  const attacker = PrivateKey.fromSeed(new Uint8Array(32).fill(0xcc));
+  // * libsodium attaches its functions when `ready` resolves, and a describe body is collected
+  // * before any hook runs — keys made here race the library (seen on CI as
+  // * "crypto_sign_seed_keypair is not a function"). Make them in a hook, after the file's own
+  // * beforeAll has awaited readiness.
+  let alice: PrivateKey, bob: PrivateKey, attacker: PrivateKey;
+  beforeAll(() => {
+    alice = PrivateKey.fromSeed(new Uint8Array(32).fill(0xa1));
+    bob = PrivateKey.fromSeed(new Uint8Array(32).fill(0xb2));
+    attacker = PrivateKey.fromSeed(new Uint8Array(32).fill(0xcc));
+  });
 
   function part(userId: bigint, sk: PrivateKey, add: boolean, remove: boolean): GroupParticipant {
     return {userId, publicKey: sk.publicKeyBytes, canAddUsers: add, canRemoveUsers: remove, version: 0};
@@ -409,15 +416,18 @@ describe('Blockchain.applyBlock — per-change authorization (WebK-2)', () => {
 // tdlib validate_state mandates the proof OMIT group_state/shared_key exactly
 // when a change rebuilt them, and CARRY them otherwise — not just match-if-present.
 describe('Blockchain.applyBlock — state-proof shape (tdlib validate_state)', () => {
-  const alice = PrivateKey.fromSeed(new Uint8Array(32).fill(0x2a));
-  const aliceP = {
-    userId: BigInt(1),
-    publicKey: alice.publicKeyBytes,
-    canAddUsers: true,
-    canRemoveUsers: true,
-    version: 0
-  };
-  const group: GroupState = {participants: [aliceP], externalPermissions: 0};
+  let alice: PrivateKey, aliceP: GroupParticipant, group: GroupState;
+  beforeAll(() => {
+    alice = PrivateKey.fromSeed(new Uint8Array(32).fill(0x2a));
+    aliceP = {
+      userId: BigInt(1),
+      publicKey: alice.publicKeyBytes,
+      canAddUsers: true,
+      canRemoveUsers: true,
+      version: 0
+    };
+    group = {participants: [aliceP], externalPermissions: 0};
+  });
 
   async function expectReject(promise: Promise<unknown>, code: BlockchainError['code']) {
     await expect(promise).rejects.toMatchObject({code});
@@ -460,11 +470,14 @@ describe('Blockchain.applyBlock — state-proof shape (tdlib validate_state)', (
 // and never touch anybody else, whatever external_permissions grants.
 describe('Blockchain.applyBlock — outsider blocks are self-joins only', () => {
   const aliceId = BigInt(1), bobId = BigInt(2), attackerId = BigInt(666), malloryId = BigInt(667);
-  const alice = PrivateKey.fromSeed(new Uint8Array(32).fill(0xd1));
-  const bob = PrivateKey.fromSeed(new Uint8Array(32).fill(0xd2));
-  const bobNewDevice = PrivateKey.fromSeed(new Uint8Array(32).fill(0xd3));
-  const attacker = PrivateKey.fromSeed(new Uint8Array(32).fill(0xdc));
-  const mallory = PrivateKey.fromSeed(new Uint8Array(32).fill(0xdd));
+  let alice: PrivateKey, bob: PrivateKey, bobNewDevice: PrivateKey, attacker: PrivateKey, mallory: PrivateKey;
+  beforeAll(() => {
+    alice = PrivateKey.fromSeed(new Uint8Array(32).fill(0xd1));
+    bob = PrivateKey.fromSeed(new Uint8Array(32).fill(0xd2));
+    bobNewDevice = PrivateKey.fromSeed(new Uint8Array(32).fill(0xd3));
+    attacker = PrivateKey.fromSeed(new Uint8Array(32).fill(0xdc));
+    mallory = PrivateKey.fromSeed(new Uint8Array(32).fill(0xdd));
+  });
   const OPEN = PERM_ADD_USERS | PERM_REMOVE_USERS;
 
   function part(userId: bigint, sk: PrivateKey, add = true, remove = true): GroupParticipant {

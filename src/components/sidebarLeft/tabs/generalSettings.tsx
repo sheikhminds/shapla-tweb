@@ -203,8 +203,8 @@ const AccentPickerRow = () => {
     const presets = getAccentPresetsForBase(base);
     const isTinted = base === 'baseThemeTinted';
     let activeId = String(theme.id ?? '');
-    // Tinted factory state has theme.id === '' but the same accent/bubble values as the blue
-    // base preset — surface that to the picker so blue reads as active right after install/reset.
+    // Tinted factory state has theme.id === '' but the same accent/bubble values as the first
+    // preset (Shapla) — surface that to the picker so it reads as active right after install/reset.
     if(isTinted && activeId === '' && presets.length) {
       activeId = presetThemeId(presets[0]);
     }

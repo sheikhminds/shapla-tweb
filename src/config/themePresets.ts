@@ -5,9 +5,9 @@
  * recognised across platforms.
  *
  * Each preset is a (accent, bubble gradient, optional pattern wallpaper) bundle. Tapping a preset
- * applies it to the *currently active* AppTheme via themeController.applyAccentPreset — the four
- * built-in default AppThemes (`day` / `night` / `light` / `tinted`) keep their factory look as a
- * separate "no preset" choice.
+ * applies it to the *currently active* AppTheme via themeController.applyAccentPreset. The four
+ * built-in AppThemes (`day` / `night` / `light` / `tinted`) are factory-painted with the Shapla
+ * palette below, so the first swatch is the look they start from.
  */
 
 import type {BaseTheme, Theme, ThemeSettings, WallPaper} from '@layer';

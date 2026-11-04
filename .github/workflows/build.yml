@@ -1,8 +1,8 @@
-name: Build
+name: Build and deploy
 
 # Every push and pull request is built away from the phone that writes the code: unit tests,
-# typecheck and the production bundle. A tag also publishes the bundle as a release asset, so
-# `dist` never has to be rebuilt to be used.
+# typecheck and the production bundle. A push to master also publishes the bundle to GitHub Pages,
+# and a tag publishes it as a release asset so `dist` never has to be rebuilt to be used.
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -59,6 +59,39 @@ jobs:
           name: shapla-tweb-dist
           path: shapla-tweb-dist.tar.gz
           retention-days: 30
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download the bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: shapla-tweb-dist
+
+      - name: Unpack into dist
+        run: |
+          mkdir -p dist
+          tar -xzf shapla-tweb-dist.tar.gz -C dist
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the page
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   release:
     needs: build
