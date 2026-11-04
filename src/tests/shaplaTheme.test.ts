@@ -2,7 +2,9 @@ import {SETTINGS_INIT} from '@config/state';
 import {getAccentPresetsForBase, shaplaDefaultWallPaper, SHAPLA_ACCENTS, SHAPLA_GREEN, SHAPLA_MESSAGES, SHAPLA_RED} from '@config/themePresets';
 import type {BaseTheme} from '@layer';
 
-const BASES: BaseTheme['_'][] = ['baseThemeClassic', 'baseThemeDay', 'baseThemeNight', 'baseThemeTinted'];
+const BASES: BaseTheme['_'][] = ['baseThemeArctic', 'baseThemeClassic', 'baseThemeDay', 'baseThemeNight', 'baseThemeTinted'];
+// * the bases `DEFAULT_THEME` carries; arctic has a swatch but no factory entry yet
+const FACTORY_BASES = ['baseThemeClassic', 'baseThemeDay', 'baseThemeNight', 'baseThemeTinted'];
 const THEMES = ['day', 'night', 'light', 'tinted'] as const;
 
 const factory = (name: typeof THEMES[number]) => SETTINGS_INIT.themes.find((theme) => theme.name === name);
@@ -17,7 +19,7 @@ describe('the Shapla palette', () => {
     for(const name of THEMES) {
       const theme = factory(name);
       expect(theme, name).toBeTruthy();
-      expect(theme.settings.length, name).toBe(BASES.length);
+      expect(theme.settings.length, name).toBe(FACTORY_BASES.length);
 
       for(const settings of theme.settings) {
         const base = settings.base_theme._;

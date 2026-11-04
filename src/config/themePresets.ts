@@ -116,6 +116,7 @@ export const SHAPLA_GREEN_TINTED = 0x1FA37D;
 const SHAPLA_RED_DARK = [0xD9243A, 0xB01C2C];
 
 export const SHAPLA_ACCENTS: {[base in BaseTheme['_']]: number} = {
+  baseThemeArctic: SHAPLA_GREEN,
   baseThemeClassic: SHAPLA_GREEN,
   baseThemeDay: SHAPLA_GREEN,
   baseThemeNight: SHAPLA_GREEN_NIGHT,
@@ -123,6 +124,7 @@ export const SHAPLA_ACCENTS: {[base in BaseTheme['_']]: number} = {
 };
 
 export const SHAPLA_MESSAGES: {[base in BaseTheme['_']]: number[]} = {
+  baseThemeArctic: [SHAPLA_RED],
   baseThemeClassic: [SHAPLA_RED],
   baseThemeDay: [SHAPLA_RED],
   baseThemeNight: SHAPLA_RED_DARK,
@@ -166,6 +168,7 @@ export function shaplaDefaultWallPaper(kind: 'light' | 'night' | 'tinted'): Wall
 // * One curated swatch per base, kept out of the iOS index space (101..107 for the curated
 // * combos, 10..18 for the base colours) so the upstream presets keep their meaning.
 const shaplaAccentPresets: {[base in BaseTheme['_']]?: AccentPreset} = {
+  baseThemeArctic: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeArctic, message_colors: SHAPLA_MESSAGES.baseThemeArctic, wallpaper: SHAPLA_WALLPAPERS.light},
   baseThemeClassic: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeClassic, message_colors: SHAPLA_MESSAGES.baseThemeClassic, wallpaper: SHAPLA_WALLPAPERS.light},
   baseThemeDay: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeDay, message_colors: SHAPLA_MESSAGES.baseThemeDay, wallpaper: SHAPLA_WALLPAPERS.light},
   baseThemeNight: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeNight, message_colors: SHAPLA_MESSAGES.baseThemeNight, wallpaper: SHAPLA_WALLPAPERS.night},
