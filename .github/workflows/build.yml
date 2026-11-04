@@ -89,6 +89,10 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # Pages' "updating_pages" step has taken over 10 minutes (the action's default), so a
+          # slow backend would fail an otherwise fine deploy. Give it half an hour.
+          timeout: 1800000
 
   release:
     needs: build
