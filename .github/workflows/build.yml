@@ -1,0 +1,82 @@
+name: Build
+
+# Every push and pull request is built away from the phone that writes the code: unit tests,
+# typecheck and the production bundle. A tag also publishes the bundle as a release asset, so
+# `dist` never has to be rebuilt to be used.
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm test --run
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Production bundle
+        run: pnpm exec vite build
+
+      - name: Package the bundle
+        run: tar -czf shapla-tweb-dist.tar.gz -C dist .
+
+      - name: Upload the bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: shapla-tweb-dist
+          path: shapla-tweb-dist.tar.gz
+          retention-days: 30
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download the bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: shapla-tweb-dist
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" shapla-tweb-dist.tar.gz \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Shapla Web $GITHUB_REF_NAME" \
+            --notes "Bangladesh-themed build of the Telegram Web K client. See FORK.md for what changed."

@@ -1,5 +1,59 @@
+# Shapla Web — শাপলা
+
+A **Bangladesh-themed Telegram web client**: an independent, open-source fork of
+[Telegram Web K (tweb)](https://github.com/morethanwords/tweb), painted with the two colours of the
+national flag.
+
+| Colour | Hex | RGB | Used for |
+|---|---|---|---|
+| Bottle green | `#006A4E` | `0, 106, 78` | Accent: buttons, links, badges, selection tint |
+| Red | `#F42A41` | `244, 42, 65` | Outgoing message bubbles |
+
+The palette is built into the client rather than layered on top of it: the factory theme of every
+base (Day, Night, Dark, Light) is Shapla, the wallpapers are mint/dark bottle-green gradients with a
+red hint, and a **Shapla** swatch is the first accent preset in *Settings → General settings → Themes*.
+Switch back to the stock look at any time by picking any other swatch.
+
+Everything tweb does is here, unchanged: MTProto in the browser, private chats, groups, channels,
+forums/topics, folders, stories, voice and video calls, the media editor, gifts and Stars, premium,
+mini apps, PWA/offline caching, and the optional accessibility layer. The status of every feature is
+tracked in [TELEGRAM_FEATURES.md](TELEGRAM_FEATURES.md).
+
+- **Modifications vs upstream:** [FORK.md](FORK.md)
+- **License:** GPL-3.0, the same as upstream. This fork is not affiliated with or endorsed by Telegram.
+- **Upstream:** https://github.com/morethanwords/tweb
+
+## Build and run
+
+Requirements: Node.js 24+, pnpm 11.
+
+```bash
+pnpm install
+pnpm start        # dev server on http://localhost:8080
+pnpm test --run   # unit tests
+pnpm run typecheck
+pnpm exec vite build   # production bundle -> dist/
+```
+
+Serve `dist/` over HTTPS (or localhost) and open it in a browser. The bundle talks to Telegram
+directly; to use your own API credentials, put them in `.env.local` (`VITE_API_ID`, `VITE_API_HASH`)
+instead of the credentials that ship in `.env`.
+
+Prebuilt bundles are attached to every release on the
+[releases page](https://github.com/sheikhminds/shapla-tweb/releases).
+
+## Support
+
+Star the repo, share it with someone who wants a green Telegram, and open an issue when something
+breaks. Pull requests that keep the GPL and credit upstream are welcome.
+
+---
+
+## Upstream README
+
 ## Telegram Web K
 Based on Webogram, patched and improved. Available for everyone here: https://web.telegram.org/k/
+
 
 
 ### Developing
