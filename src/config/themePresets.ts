@@ -5,9 +5,9 @@
  * recognised across platforms.
  *
  * Each preset is a (accent, bubble gradient, optional pattern wallpaper) bundle. Tapping a preset
- * applies it to the *currently active* AppTheme via themeController.applyAccentPreset — the four
- * built-in default AppThemes (`day` / `night` / `light` / `tinted`) keep their factory look as a
- * separate "no preset" choice.
+ * applies it to the *currently active* AppTheme via themeController.applyAccentPreset. The four
+ * built-in AppThemes (`day` / `night` / `light` / `tinted`) are factory-painted with the Shapla
+ * palette below, so the first swatch is the look they start from.
  */
 
 import type {BaseTheme, Theme, ThemeSettings, WallPaper} from '@layer';
@@ -98,6 +98,81 @@ const TINTED_BASE_WALLPAPERS: {[name in BaseColorName]?: AccentPresetWallpaper} 
   red:    {intensity: 40, background_color: 0x2c211b, second_background_color: 0x44332a, third_background_color: 0x22191f, fourth_background_color: 0x3b2d36, dark: true},
   yellow: {intensity: 40, background_color: 0x2c2512, second_background_color: 0x45360b, third_background_color: 0x221d08, fourth_background_color: 0x3b2f13, dark: true},
   gray:   {intensity: 40, background_color: 0x1c2731, second_background_color: 0x1a1c25, third_background_color: 0x27303b, fourth_background_color: 0x1b1b21, dark: true}
+};
+
+// * Shapla (শাপলা) — the Bangladesh flag palette: bottle green #006A4E and red #F42A41.
+// * The green is the interface accent, the red fills the outgoing bubbles, and the wallpapers
+// * are a light mint or a dark bottle-green gradient with a red hint, so both flag colours are
+// * on screen in every base theme. Shared with `DEFAULT_THEME` in `state.ts`, which makes this
+// * the factory look of the client instead of the stock blue/purple.
+export const SHAPLA_GREEN = 0x006A4E;
+export const SHAPLA_RED = 0xF42A41;
+
+// * A lighter green for the dark bases, where the flag green would sink into the background.
+export const SHAPLA_GREEN_NIGHT = 0x3ECFA3;
+export const SHAPLA_GREEN_TINTED = 0x1FA37D;
+
+// * Two stops on the dark bases so the outgoing bubbles keep the iOS-style gradient.
+const SHAPLA_RED_DARK = [0xD9243A, 0xB01C2C];
+
+export const SHAPLA_ACCENTS: {[base in BaseTheme['_']]: number} = {
+  baseThemeArctic: SHAPLA_GREEN,
+  baseThemeClassic: SHAPLA_GREEN,
+  baseThemeDay: SHAPLA_GREEN,
+  baseThemeNight: SHAPLA_GREEN_NIGHT,
+  baseThemeTinted: SHAPLA_GREEN_TINTED
+};
+
+export const SHAPLA_MESSAGES: {[base in BaseTheme['_']]: number[]} = {
+  baseThemeArctic: [SHAPLA_RED],
+  baseThemeClassic: [SHAPLA_RED],
+  baseThemeDay: [SHAPLA_RED],
+  baseThemeNight: SHAPLA_RED_DARK,
+  baseThemeTinted: SHAPLA_RED_DARK
+};
+
+export const SHAPLA_WALLPAPERS: {[key in 'light' | 'night' | 'tinted']: AccentPresetWallpaper} = {
+  light: {intensity: 50, background_color: 0xEFFAF6, second_background_color: 0xD8F2E8, third_background_color: 0xFFE1E5, fourth_background_color: 0xBFE8D8},
+  night: {intensity: 50, background_color: 0x061C16, second_background_color: 0x0B2A21, third_background_color: 0x2A0D12, fourth_background_color: 0x0E241C, dark: true},
+  tinted: {intensity: 40, background_color: 0x05231B, second_background_color: 0x0A2E24, third_background_color: 0x240C11, fourth_background_color: 0x0B1F19, dark: true}
+};
+
+// * The factory wallpapers of the client, built from the palette above so `DEFAULT_THEME` and the
+// * accent swatch can never drift apart. Sign convention matches `buildPresetWallpaper`: tweb's
+// * pattern renderer takes a negative intensity for a dark wallpaper.
+export function shaplaDefaultWallPaper(kind: 'light' | 'night' | 'tinted'): WallPaper.wallPaper {
+  const wp = SHAPLA_WALLPAPERS[kind];
+  return {
+    _: 'wallPaper',
+    pFlags: {
+      default: true,
+      pattern: true,
+      ...(wp.dark ? {dark: true as const} : {})
+    },
+    access_hash: '',
+    document: undefined,
+    id: '',
+    slug: 'pattern',
+    settings: {
+      _: 'wallPaperSettings',
+      pFlags: {},
+      intensity: wp.dark ? -wp.intensity : wp.intensity,
+      background_color: wp.background_color,
+      second_background_color: wp.second_background_color,
+      third_background_color: wp.third_background_color,
+      fourth_background_color: wp.fourth_background_color
+    }
+  };
+}
+
+// * One curated swatch per base, kept out of the iOS index space (101..107 for the curated
+// * combos, 10..18 for the base colours) so the upstream presets keep their meaning.
+const shaplaAccentPresets: {[base in BaseTheme['_']]?: AccentPreset} = {
+  baseThemeArctic: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeArctic, message_colors: SHAPLA_MESSAGES.baseThemeArctic, wallpaper: SHAPLA_WALLPAPERS.light},
+  baseThemeClassic: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeClassic, message_colors: SHAPLA_MESSAGES.baseThemeClassic, wallpaper: SHAPLA_WALLPAPERS.light},
+  baseThemeDay: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeDay, message_colors: SHAPLA_MESSAGES.baseThemeDay, wallpaper: SHAPLA_WALLPAPERS.light},
+  baseThemeNight: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeNight, message_colors: SHAPLA_MESSAGES.baseThemeNight, wallpaper: SHAPLA_WALLPAPERS.night},
+  baseThemeTinted: {id: 201, accent_color: SHAPLA_ACCENTS.baseThemeTinted, message_colors: SHAPLA_MESSAGES.baseThemeTinted, wallpaper: SHAPLA_WALLPAPERS.tinted}
 };
 
 // HSV "withMultiplied" — direct port of iOS UIColor.withMultiplied(hue:saturation:brightness:).
@@ -227,22 +302,28 @@ const BASE_COLORS_NIGHT: BaseColorName[] = ['blue', 'cyan', 'green', 'pink', 'or
 const BASE_COLORS_DAY: BaseColorName[] = ['blue', 'cyan', 'green', 'pink', 'orange', 'purple', 'red', 'yellow', 'gray'];
 
 export function getAccentPresetsForBase(base: BaseTheme['_']): AccentPreset[] {
-  switch(base) {
-    case 'baseThemeClassic':
-      // dayClassic — 7 curated combos + 9 base colors.
-      return [...dayClassicAccentPresets, ...BASE_COLORS_DAY.map((c) => baseColorPreset(c, base))];
-    case 'baseThemeNight':
-      // night — 3 curated combos (with vivid wallpapers) + 8 base colors (no gray).
-      return [...nightAccentPresets, ...BASE_COLORS_NIGHT.map((c) => baseColorPreset(c, base))];
-    case 'baseThemeDay':
-      // day — 4 curated combos (no wallpaper) + 9 base colors.
-      return [...dayAccentPresets, ...BASE_COLORS_DAY.map((c) => baseColorPreset(c, base))];
-    case 'baseThemeTinted':
-      // nightAccent ("Dark") — NO curated combos in iOS, just 9 base colors. Total 9 + default = 10.
-      return BASE_COLORS_DARK.map((c) => baseColorPreset(c, base));
-    default:
-      return [];
-  }
+  const shapla = shaplaAccentPresets[base];
+  const presets = (() => {
+    switch(base) {
+      case 'baseThemeClassic':
+        // dayClassic — 7 curated combos + 9 base colors.
+        return [...dayClassicAccentPresets, ...BASE_COLORS_DAY.map((c) => baseColorPreset(c, base))];
+      case 'baseThemeNight':
+        // night — 3 curated combos (with vivid wallpapers) + 8 base colors (no gray).
+        return [...nightAccentPresets, ...BASE_COLORS_NIGHT.map((c) => baseColorPreset(c, base))];
+      case 'baseThemeDay':
+        // day — 4 curated combos (no wallpaper) + 9 base colors.
+        return [...dayAccentPresets, ...BASE_COLORS_DAY.map((c) => baseColorPreset(c, base))];
+      case 'baseThemeTinted':
+        // nightAccent ("Dark") — NO curated combos in iOS, just 9 base colors. Total 9 + default = 10.
+        return BASE_COLORS_DARK.map((c) => baseColorPreset(c, base));
+      default:
+        return [];
+    }
+  })();
+
+  // * Shapla first: it is the client's own palette and the factory default.
+  return shapla ? [shapla, ...presets] : presets;
 }
 
 // Wallpaper id format scoped to client-side presets. Different from cloud wallpaper ids

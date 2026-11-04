@@ -9,17 +9,12 @@ import type {ShortcutKey as PasscodeLockShortcutKey} from '@components/sidebarLe
 import {IS_MOBILE} from '@environment/userAgent';
 import getTimeFormat from '@helpers/getTimeFormat';
 import App from '@config/app';
-import {getAccentPresetsForBase} from '@config/themePresets';
+import {SHAPLA_ACCENTS, SHAPLA_MESSAGES, shaplaDefaultWallPaper} from '@config/themePresets';
 import {ColoredBrushType} from '@components/mediaEditor/context';
 import {FontKey} from '@components/mediaEditor/types';
 import type {BotConnectionReview} from '@appManagers/appBusinessManager';
 import type {UnconfirmedAuthorization} from '@appManagers/appAccountManager';
 import type {ContactsSortMode} from '@appManagers/utils/users/sortContacts';
-
-// Factory tinted ("Dark") collapses onto the first base-color preset (blue) so the accent picker
-// can omit a separate "default" swatch — resetting to factory now reaches the same state the user
-// gets by tapping the blue circle.
-const TINTED_DEFAULT_PRESET = getAccentPresetsForBase('baseThemeTinted')[0];
 
 const STATE_VERSION = App.version;
 const BUILD = App.build;
@@ -332,117 +327,30 @@ export const DEFAULT_THEME: Theme = {
     _: 'themeSettings',
     pFlags: {},
     base_theme: {_: 'baseThemeClassic'},
-    accent_color: 0x3390ec,
-    message_colors: [0x5CA853],
-    wallpaper: {
-      _: 'wallPaper',
-      pFlags: {
-        default: true,
-        pattern: true
-      },
-      access_hash: '',
-      document: undefined,
-      id: '',
-      slug: 'pattern',
-      settings: {
-        _: 'wallPaperSettings',
-        pFlags: {},
-        intensity: 50,
-        background_color: 0xdbddbb,
-        second_background_color: 0x6ba587,
-        third_background_color: 0xd5d88d,
-        fourth_background_color: 0x88b884
-      }
-    }
+    accent_color: SHAPLA_ACCENTS.baseThemeClassic,
+    message_colors: SHAPLA_MESSAGES.baseThemeClassic,
+    wallpaper: shaplaDefaultWallPaper('light')
   }, {
     _: 'themeSettings',
     pFlags: {},
     base_theme: {_: 'baseThemeNight'},
-    accent_color: 0x8774E1,
-    message_colors: [0x8774E1],
-    wallpaper: {
-      _: 'wallPaper',
-      pFlags: {
-        default: true,
-        pattern: true,
-        dark: true
-      },
-      access_hash: '',
-      document: undefined,
-      id: '',
-      slug: 'pattern',
-      settings: {
-        _: 'wallPaperSettings',
-        pFlags: {},
-        intensity: -50,
-        background_color: 0xfec496,
-        second_background_color: 0xdd6cb9,
-        third_background_color: 0x962fbf,
-        fourth_background_color: 0x4f5bd5
-      }
-    }
+    accent_color: SHAPLA_ACCENTS.baseThemeNight,
+    message_colors: SHAPLA_MESSAGES.baseThemeNight,
+    wallpaper: shaplaDefaultWallPaper('night')
   }, {
     _: 'themeSettings',
     pFlags: {},
     base_theme: {_: 'baseThemeTinted'},
-    // accent + wallpaper aligned with iOS Dark Blue ("nightAccent"). See submodules/Telegram-iOS/
-    // submodules/TelegramPresentationData/Sources/DefaultDarkTintedPresentationTheme.swift —
-    // the home wallpaper is the `.blue` baseColor variant from `colorWallpaper` (line 13-14):
-    //   case .blue: return (.variant7, 40, [0x1e3557, 0x182036, 0x1c4352, 0x16263a])
-    // accent + bubble gradient come from the blue base-color preset so factory state matches what
-    // the accent picker offers as its first swatch (the "default" swatch is hidden on tinted).
-    accent_color: TINTED_DEFAULT_PRESET.accent_color,
-    message_colors: TINTED_DEFAULT_PRESET.message_colors,
-    wallpaper: {
-      _: 'wallPaper',
-      pFlags: {
-        default: true,
-        pattern: true,
-        dark: true
-      },
-      access_hash: '',
-      document: undefined,
-      id: '',
-      slug: 'pattern',
-      settings: {
-        _: 'wallPaperSettings',
-        pFlags: {},
-        // iOS stores intensity 40 (positive) for these dark wallpapers. tweb's pattern renderer
-        // expects the dark-pattern sign convention: dark wallpapers carry negative intensity, abs
-        // value used as the pattern overlay opacity. So we flip iOS' 40 to -40.
-        intensity: -40,
-        background_color: 0x1e3557,
-        second_background_color: 0x182036,
-        third_background_color: 0x1c4352,
-        fourth_background_color: 0x16263a
-      }
-    }
+    accent_color: SHAPLA_ACCENTS.baseThemeTinted,
+    message_colors: SHAPLA_MESSAGES.baseThemeTinted,
+    wallpaper: shaplaDefaultWallPaper('tinted')
   }, {
     _: 'themeSettings',
     pFlags: {},
     base_theme: {_: 'baseThemeDay'},
-    accent_color: 0x2D7ED5,
-    message_colors: [0x2D7ED5],
-    wallpaper: {
-      _: 'wallPaper',
-      pFlags: {
-        default: true,
-        pattern: true
-      },
-      access_hash: '',
-      document: undefined,
-      id: '',
-      slug: 'pattern',
-      settings: {
-        _: 'wallPaperSettings',
-        pFlags: {},
-        intensity: 50,
-        background_color: 0xb1e0fa,
-        second_background_color: 0x82b0d8,
-        third_background_color: 0xa0d8e8,
-        fourth_background_color: 0xe5f0f8
-      }
-    }
+    accent_color: SHAPLA_ACCENTS.baseThemeDay,
+    message_colors: SHAPLA_MESSAGES.baseThemeDay,
+    wallpaper: shaplaDefaultWallPaper('light')
   }],
   slug: '',
   title: '',
@@ -452,12 +360,13 @@ export const DEFAULT_THEME: Theme = {
 
 // Per-base highlighting colors used when nothing has been computed from a wallpaper yet.
 // Stored on every settings entry so that switching the active base theme keeps highlights coherent
-// (mirrors how iOS persists a per-base TelegramThemeSettings array).
+// (mirrors how iOS persists a per-base TelegramThemeSettings array). Shapla: the selection tint of
+// each base follows the flag green, lighter on the dark bases.
 const DEFAULT_HIGHLIGHTING_COLORS: {[base in BaseTheme['_']]?: string} = {
-  baseThemeClassic: 'hsla(86.4, 43.846153%, 45.117647%, .4)',
-  baseThemeNight: 'hsla(299.142857, 44.166666%, 37.470588%, .4)',
-  baseThemeTinted: 'hsla(258.461538, 50%, 65.490196%, .4)',
-  baseThemeDay: 'hsla(210, 67.741935%, 50.588235%, .4)'
+  baseThemeClassic: 'hsla(162, 70%, 25%, .4)',
+  baseThemeNight: 'hsla(160, 55%, 45%, .4)',
+  baseThemeTinted: 'hsla(163, 50%, 40%, .4)',
+  baseThemeDay: 'hsla(162, 70%, 28%, .4)'
 };
 
 const makeDefaultAppTheme = (name: AppTheme['name']): AppTheme => {
